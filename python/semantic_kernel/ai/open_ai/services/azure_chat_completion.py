@@ -46,6 +46,16 @@ class AzureChatCompletion(OpenAIChatCompletion):
         :param ad_auth: Whether to use Azure Active Directory authentication.
             (Optional) The default value is False.
         """
+        if endpoint is None and api_key is None:
+            from synapse.ml.mlflow import get_mlflow_env_config
+
+            mlflow_env_config = get_mlflow_env_config()
+            api_key, endpoint = (
+                mlflow_env_config.driver_aad_token,
+                f"{mlflow_env_config.workload_endpoint}cognitive/openai",
+            )
+            ad_auth = True
+
         if not deployment_name:
             raise ValueError("The deployment name cannot be `None` or empty")
         if not api_key:
